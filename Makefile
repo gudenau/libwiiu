@@ -25,21 +25,34 @@ INCLUDES	:= include
 SOURCE		:= src
 # TODO do this automaticly?
 SOURCES		:= src src/wiiu src/wiiu/service
+RELEASE		:= release
 
 CFLAGS	:= -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math -O3 -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing $(addprefix -I,$(INCLUDES))
 ASFLAGS	:= -mregnames
 LDFLAGS	:= -nostartfiles -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,-wrap,valloc,-wrap,_valloc_r,-wrap,_pvalloc_r,--gc-sections
 
+OUTPUT	:= $(BUILD)/$(TARGET).a
+
 CFILES	:= $(foreach DIR,$(SOURCES),$(wildcard $(DIR)/*.c))
 OFILES	:= $(patsubst $(SOURCE)/%.c,$(BUILD)/%.o,$(CFILES))
 
-all: buildDirs $(OFILES)
+all: buildDirs $(RELEASE)
+
+$(RELEASE): releaseDirs $(OUTPUT)
+	cp $(OUTPUT) $(RELEASE)/lib
+	cp -r $(INCLUDES) $(RELEASE)
+
+$(OUTPUT): $(OFILES)
+	$(AR) rcs $@ $?
 
 $(BUILD)/%.o: $(SOURCE)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+releaseDirs:
+	mkdir -p $(RELEASE) $(RELEASE)/lib
 
 buildDirs:
 	mkdir -p $(BUILD) $(patsubst $(SOURCE)/%,$(BUILD)/%,$(SOURCES))
 
 clean:
-	rm -vfr $(BUILD)
+	rm -vfr $(BUILD) $(RELEASE)
