@@ -24,12 +24,12 @@ BUILD		:= build
 INCLUDES	:= include
 SOURCE		:= src
 # TODO do this automaticly?
-SOURCES		:= src src/wiiu src/wiiu/service
+SOURCES		:= $(SOURCE) $(SOURCE)/wiiu $(SOURCE)/wiiu/service
 RELEASE		:= release
 
-CFLAGS	:= -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math -O3 -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing $(addprefix -I,$(INCLUDES))
+CFLAGS	:= -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math -O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wno-strict-aliasing $(addprefix -I,$(INCLUDES))
 ASFLAGS	:= -mregnames
-LDFLAGS	:= -nostartfiles -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,-wrap,valloc,-wrap,_valloc_r,-wrap,_pvalloc_r,--gc-sections
+LDFLAGS	:= -nostartfiles -nostdlib -Wl,-Map,$(notdir $@).map,--gc-sections
 
 OUTPUT	:= $(BUILD)/$(TARGET).a
 
@@ -41,6 +41,7 @@ all: buildDirs $(RELEASE)
 $(RELEASE): releaseDirs $(OUTPUT)
 	cp $(OUTPUT) $(RELEASE)/lib
 	cp -r $(INCLUDES) $(RELEASE)
+	cp link.ld $(RELEASE)
 
 $(OUTPUT): $(OFILES)
 	$(AR) rcs $@ $?

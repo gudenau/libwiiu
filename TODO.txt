@@ -1,0 +1,5 @@
+src/wiiu/service/coreinit.c:
+	Keep track of loaded RPLs
+
+include/wiiu/service/coreinit.h
+	Figure out unknown params
